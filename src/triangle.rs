@@ -33,6 +33,10 @@ impl Triangle {
     pub fn set_color(&mut self, color: [u8; 3]) {
         self.color = color;
     }
+
+    pub fn get_color(&self) -> [u8;3] {
+        self.color
+    }
 }
 
 impl Display for Triangle {
