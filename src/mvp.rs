@@ -15,10 +15,10 @@ pub fn get_view_matrix(eye_pos: Point3<f32>) -> Matrix4<f32> {
     )
 }
 
-#[rustfmt::skip]
 pub fn get_model_matrix(rotate_axis: Vector3<f32>, rotate_angle: f32) -> Matrix4<f32> {
     let rotate_radius = get_radius(rotate_angle);
 
+    #[rustfmt::skip]
     let axis_cross_m = Matrix3::new(
         0.0, -rotate_axis.z, rotate_axis.y,
         rotate_axis.z, 0.0, rotate_axis.x,
@@ -29,12 +29,7 @@ pub fn get_model_matrix(rotate_axis: Vector3<f32>, rotate_angle: f32) -> Matrix4
         + (1.0 - f32::cos(rotate_radius)) * rotate_axis * rotate_axis.transpose()
         + f32::sin(rotate_radius) * axis_cross_m;
 
-    Matrix4::new(
-        rotation_m[(0, 0)], rotation_m[(0, 1)], rotation_m[(0, 2)], 0.0,
-        rotation_m[(1, 0)], rotation_m[(1, 1)], rotation_m[(1, 2)], 0.0,
-        rotation_m[(2, 0)], rotation_m[(2, 1)], rotation_m[(2, 2)], 0.0,
-        0.0, 0.0, 0.0, 1.0,
-    )
+    rotation_m.to_homogeneous()
 }
 
 pub fn get_projection_matrix(fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Matrix4<f32> {

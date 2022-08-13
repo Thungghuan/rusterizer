@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use nalgebra::Point3;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Triangle {
     vertex: [Point3<f32>; 3],
     color: [u8; 3],
@@ -16,6 +16,14 @@ impl Triangle {
             vertex,
             color: [255, 255, 255],
         }
+    }
+
+    pub fn set_vertex(&mut self, vertex: [Point3<f32>; 3]) {
+        self.vertex = vertex;
+    }
+
+    pub fn get_vertex(&self) -> [Point3<f32>; 3] {
+        self.vertex
     }
 
     pub fn a(&self) -> Point3<f32> {
@@ -34,7 +42,7 @@ impl Triangle {
         self.color = color;
     }
 
-    pub fn get_color(&self) -> [u8;3] {
+    pub fn get_color(&self) -> [u8; 3] {
         self.color
     }
 }

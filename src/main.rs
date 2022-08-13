@@ -17,9 +17,9 @@ fn main() {
     let mut rst = rasterizer::Rasterizer::new(WIDTH, HEIGHT);
 
     let tri = triangle::Triangle::new(
-        Point3::new(200.0, 200.0, 2.0),
-        Point3::new(350.0, 500.0, 2.0),
-        Point3::new(500.0, 200.0, 2.0),
+        Point3::new(2.0, 0.0, -2.0),
+        Point3::new(0.0, 2.0, -2.0),
+        Point3::new(-2.0, 0.0, -2.0),
     );
 
     rst.clear();
