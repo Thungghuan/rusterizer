@@ -68,7 +68,13 @@ impl Rasterizer {
         self.frame_buf[index] = color;
     }
 
-    fn draw_line_low(&mut self, begin: Point2<f32>, end: Point2<f32>, color: [u8; 3]) {
+    fn draw_line_helper(
+        &mut self,
+        begin: Point2<f32>,
+        end: Point2<f32>,
+        color: [u8; 3],
+        is_flip: bool,
+    ) {
         let x0 = begin.x as i32;
         let y0 = begin.y as i32;
         let x1 = end.x as i32;
@@ -86,7 +92,11 @@ impl Rasterizer {
         let mut y = y0;
 
         for x in x0..=x1 {
-            self.set_pixel(x, y, color);
+            if is_flip {
+                self.set_pixel(y, x, color);
+            } else {
+                self.set_pixel(x, y, color);
+            }
 
             if d > 0 {
                 y += yi;
@@ -94,35 +104,6 @@ impl Rasterizer {
             }
 
             d += 2 * dy;
-        }
-    }
-
-    fn draw_line_high(&mut self, begin: Point2<f32>, end: Point2<f32>, color: [u8; 3]) {
-        let x0 = begin.x as i32;
-        let y0 = begin.y as i32;
-        let x1 = end.x as i32;
-        let y1 = end.y as i32;
-        let mut dx = x1 - x0;
-        let dy = y1 - y0;
-        let mut xi = 1;
-
-        if dx < 0 {
-            xi = -1;
-            dx = -dx;
-        }
-
-        let mut d = 2 * dx - dy;
-        let mut x = x0;
-
-        for y in y0..=y1 {
-            self.set_pixel(x, y, color);
-
-            if d > 0 {
-                x += xi;
-                d -= 2 * dy;
-            }
-
-            d += 2 * dx;
         }
     }
 
@@ -136,15 +117,15 @@ impl Rasterizer {
 
         if dy < dx {
             if x0 < x1 {
-                self.draw_line_low(begin, end, color);
+                self.draw_line_helper(begin, end, color, false);
             } else {
-                self.draw_line_low(end, begin, color);
+                self.draw_line_helper(end, begin, color, false);
             }
         } else {
             if y0 < y1 {
-                self.draw_line_high(begin, end, color);
+                self.draw_line_helper(begin.yx(), end.yx(), color, true);
             } else {
-                self.draw_line_high(end, begin, color);
+                self.draw_line_helper(end.yx(), begin.yx(), color, true);
             }
         }
     }
