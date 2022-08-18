@@ -64,7 +64,7 @@ impl Rasterizer {
         let width = self.width as i32;
         let height = self.height as i32;
 
-        if x < 0 || x > width || y < 0 || y > height {
+        if x < 0 || x > width - 1 || y < 0 || y > height - 1 {
             // panic!("Error: Out of range");
             return;
         }
