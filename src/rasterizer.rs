@@ -152,7 +152,7 @@ impl Rasterizer {
                     vertex.z /= vertex.w;
 
                     vertex.x = 0.5 * (self.width as f32) * (vertex.x + 1.0);
-                    vertex.y = 0.5 * (self.height as f32) * (vertex.y + 1.0);
+                    vertex.y = 0.5 * (self.height as f32) * (1.0 - vertex.y);
 
                     let f1 = (50.0 - 0.1) / 2.0;
                     let f2 = (50.0 + 0.1) / 2.0;

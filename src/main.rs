@@ -25,7 +25,7 @@ fn main() {
     rst.clear();
 
     rst.set_view_matrix(get_view_matrix(Point3::new(0.0, 0.0, 5.0)));
-    rst.set_model_matrix(get_model_matrix(Vector3::new(-1.0, 0.0, 0.0), 20.0));
+    rst.set_model_matrix(get_model_matrix(Vector3::new(-1.0, 0.0, 0.0), 0.0));
     rst.set_projection_matrix(get_projection_matrix(45.0, 1.0, 0.1, 50.0));
 
     rst.draw(&[tri]);
