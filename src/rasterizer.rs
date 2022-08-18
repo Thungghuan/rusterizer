@@ -3,8 +3,8 @@ use nalgebra::{Matrix4, Point2, Point3};
 use crate::triangle::Triangle;
 
 pub struct Rasterizer {
-    width: i32,
-    height: i32,
+    width: usize,
+    height: usize,
 
     model_m: Matrix4<f32>,
     view_m: Matrix4<f32>,
@@ -15,8 +15,8 @@ pub struct Rasterizer {
 }
 
 impl Rasterizer {
-    pub fn new(width: i32, height: i32) -> Self {
-        let length = (width * height) as usize;
+    pub fn new(width: usize, height: usize) -> Self {
+        let length = width * height;
 
         let frame_buf = vec![[0, 0, 0]; length];
         let depth_buf = vec![f32::INFINITY; length];
@@ -54,12 +54,17 @@ impl Rasterizer {
     }
 
     pub fn get_index(&self, x: i32, y: i32) -> usize {
+        let width = self.width as i32;
+
         // treat the top-left corner as origin
-        (y * self.width + x) as usize
+        (y * width + x) as usize
     }
 
     fn set_pixel(&mut self, x: i32, y: i32, color: [u8; 3]) {
-        if x < 0 || x > self.width || y < 0 || y > self.height {
+        let width = self.width as i32;
+        let height = self.height as i32;
+
+        if x < 0 || x > width || y < 0 || y > height {
             // panic!("Error: Out of range");
             return;
         }

@@ -3,16 +3,13 @@ mod mvp;
 mod rasterizer;
 mod triangle;
 
+use minifb::{Key, Window, WindowOptions};
 use mvp::*;
 use nalgebra::{Point3, Vector3};
-use opencv::{
-    core::{self, Mat},
-    highgui,
-};
 
 fn main() {
-    const WIDTH: i32 = 700;
-    const HEIGHT: i32 = 700;
+    const WIDTH: usize = 700;
+    const HEIGHT: usize = 700;
 
     let mut rst = rasterizer::Rasterizer::new(WIDTH, HEIGHT);
 
@@ -30,17 +27,15 @@ fn main() {
 
     rst.draw(&[tri]);
 
-    let image = unsafe {
-        Mat::new_rows_cols_with_data(
-            HEIGHT,
-            WIDTH,
-            core::CV_8UC3,
-            rst.frame_buf.as_ptr() as *mut std::ffi::c_void,
-            core::Mat_AUTO_STEP,
-        )
-        .unwrap()
-    };
+    let buffer = rst
+        .frame_buf
+        .iter()
+        .map(|v| ((v[0] as u32) << 16) | ((v[1] as u32) << 8) | (v[2] as u32))
+        .collect::<Vec<u32>>();
 
-    highgui::imshow("Rusterizer", &image).unwrap();
-    highgui::wait_key(0).unwrap();
+    let mut window = Window::new("Rusterizer", WIDTH, HEIGHT, WindowOptions::default()).unwrap();
+
+    while window.is_open() && !window.is_key_down(Key::Escape) {
+        window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
+    }
 }
