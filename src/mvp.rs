@@ -6,11 +6,11 @@ fn get_radius(degree: f32) -> f32 {
 }
 
 #[rustfmt::skip]
-pub fn get_view_matrix(eye_pos: Point3<f32>) -> Matrix4<f32> {
+pub fn get_view_matrix(cam_pos: Point3<f32>) -> Matrix4<f32> {
     Matrix4::new(
-        1.0, 0.0, 0.0, -eye_pos.x,
-        0.0, 1.0, 0.0, -eye_pos.y,
-        0.0, 0.0, 1.0, -eye_pos.z,
+        1.0, 0.0, 0.0, -cam_pos.x,
+        0.0, 1.0, 0.0, -cam_pos.y,
+        0.0, 0.0, 1.0, -cam_pos.z,
         0.0, 0.0, 0.0, 1.0,
     )
 }
@@ -41,7 +41,7 @@ pub fn get_projection_matrix(fov: f32, aspect_ratio: f32, z_near: f32, z_far: f3
     let half = get_radius(fov / 2.0);
     let top = half.tan() * z_near.abs();
     let bottom = -top;
-    let right = -top * aspect_ratio;
+    let right = top * aspect_ratio;
     let left = -right;
 
     // translate to origin

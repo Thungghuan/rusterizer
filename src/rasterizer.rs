@@ -55,9 +55,9 @@ impl Rasterizer {
 
     pub fn get_index(&self, x: i32, y: i32) -> usize {
         let width = self.width as i32;
+        let height = self.height as i32;
 
-        // treat the top-left corner as origin
-        (y * width + x) as usize
+        ((height - 1 - y) * width + x) as usize
     }
 
     fn set_pixel(&mut self, x: i32, y: i32, color: [u8; 3]) {
@@ -142,6 +142,10 @@ impl Rasterizer {
         self.draw_line(tri.c().xy(), tri.a().xy(), tri.get_color());
     }
 
+    fn shading_triangle(&mut self, tri: &Triangle) {
+        self.draw_triangle(tri);
+    }
+
     pub fn draw(&mut self, triangle_list: &[Triangle]) {
         let mvp_m = self.projection_m * self.view_m * self.model_m;
 
@@ -156,8 +160,8 @@ impl Rasterizer {
                     vertex.y /= vertex.w;
                     vertex.z /= vertex.w;
 
-                    vertex.x = 0.5 * (self.width as f32) * (vertex.x + 1.0);
-                    vertex.y = 0.5 * (self.height as f32) * (1.0 - vertex.y);
+                    vertex.x = 0.5 * (self.width as f32) * (1.0 + vertex.x);
+                    vertex.y = 0.5 * (self.height as f32) * (1.0 + vertex.y);
 
                     let f1 = (50.0 - 0.1) / 2.0;
                     let f2 = (50.0 + 0.1) / 2.0;
@@ -170,7 +174,7 @@ impl Rasterizer {
 
             triangle.set_vertex(vertexs);
 
-            self.draw_triangle(&triangle);
+            self.shading_triangle(&triangle);
         }
     }
 }
