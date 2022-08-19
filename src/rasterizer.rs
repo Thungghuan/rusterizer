@@ -1,4 +1,4 @@
-use nalgebra::{Matrix4, Point2, Point3};
+use nalgebra::{Matrix4, Point2, Point4};
 
 use crate::triangle::Triangle;
 
@@ -74,6 +74,7 @@ impl Rasterizer {
         self.frame_buf[index] = color;
     }
 
+    #[allow(unused)]
     fn draw_line_helper(
         &mut self,
         begin: Point2<f32>,
@@ -113,6 +114,7 @@ impl Rasterizer {
         }
     }
 
+    #[allow(unused)]
     fn draw_line(&mut self, begin: Point2<f32>, end: Point2<f32>, color: [u8; 3]) {
         let x0 = begin.x;
         let y0 = begin.y;
@@ -136,6 +138,7 @@ impl Rasterizer {
         }
     }
 
+    #[allow(unused)]
     fn draw_triangle(&mut self, tri: &Triangle) {
         self.draw_line(tri.a().xy(), tri.b().xy(), tri.get_color());
         self.draw_line(tri.b().xy(), tri.c().xy(), tri.get_color());
@@ -143,7 +146,34 @@ impl Rasterizer {
     }
 
     fn shading_triangle(&mut self, tri: &Triangle) {
-        self.draw_triangle(tri);
+        let [left, right, top, bottom] = tri.get_bounding();
+
+        for x in (left as u32)..(right as u32) {
+            for y in (bottom as u32)..(top as u32) {
+                let point = Point2::new(x, y);
+
+                if !tri.include_point(point) {
+                    continue;
+                }
+
+                let [alpha, beta, gamma] = tri.get_bary_centric(Point2::new(x, y));
+
+                let z_interpolated = (alpha * tri.a().z / tri.a().w
+                    + beta * tri.b().z / tri.b().w
+                    + gamma * tri.c().z / tri.c().w)
+                    / (alpha / tri.a().w + beta / tri.b().w + gamma / tri.c().w);
+
+                let depth_buf_idx = self.get_index(x as i32, y as i32);
+
+                if z_interpolated >= self.depth_buf[depth_buf_idx] {
+                    continue;
+                }
+
+                self.depth_buf[depth_buf_idx] = z_interpolated;
+
+                self.set_pixel(x as i32, y as i32, tri.get_color());
+            }
+        }
     }
 
     pub fn draw(&mut self, triangle_list: &[Triangle]) {
@@ -152,25 +182,23 @@ impl Rasterizer {
         for tri in triangle_list {
             let mut triangle = tri.clone();
 
-            let vertexs = triangle
-                .get_vertex()
-                .map(|vertex| mvp_m * vertex.to_homogeneous())
-                .map(|mut vertex| {
-                    vertex.x /= vertex.w;
-                    vertex.y /= vertex.w;
-                    vertex.z /= vertex.w;
+            let vertexs = triangle.get_vertex().map(|vertex| {
+                let mut vertex = mvp_m * vertex.xyz().to_homogeneous();
 
-                    vertex.x = 0.5 * (self.width as f32) * (1.0 + vertex.x);
-                    vertex.y = 0.5 * (self.height as f32) * (1.0 + vertex.y);
+                vertex.x /= vertex.w;
+                vertex.y /= vertex.w;
+                vertex.z /= vertex.w;
 
-                    let f1 = (50.0 - 0.1) / 2.0;
-                    let f2 = (50.0 + 0.1) / 2.0;
+                vertex.x = 0.5 * (self.width as f32) * (1.0 + vertex.x);
+                vertex.y = 0.5 * (self.height as f32) * (1.0 + vertex.y);
 
-                    vertex.z = vertex.z * f1 + f2;
+                let f1 = (50.0 - 0.1) / 2.0;
+                let f2 = (50.0 + 0.1) / 2.0;
 
-                    vertex
-                })
-                .map(|vertex| Point3::from(vertex.xyz()));
+                vertex.z = vertex.z * f1 + f2;
+
+                Point4::from(vertex)
+            });
 
             triangle.set_vertex(vertexs);
 
